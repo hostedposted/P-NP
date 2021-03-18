@@ -34,7 +34,6 @@ import { DOWNLOAD_LINK, VERSION } from "./constants";
 			return res.status(400).send(e.message);
 		}
 	});
-
 	app.get("/version", (req, res) => res.send(VERSION));
 	app.get("/download", (req, res) => res.redirect(DOWNLOAD_LINK));
 
