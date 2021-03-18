@@ -164,7 +164,6 @@ console.image=((o,t=1)=>{const e=new Image;e.onload=(()=>{const n=_getBox(e.widt
 	SW.Load.onGameLoad();
     setTimeout(() => {
         (async () => {
-			_.instance.game.state.states = Object.fromEntries(_.instance.game.state.states)
           eval(
             await (
               await fetch(
