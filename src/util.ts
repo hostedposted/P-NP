@@ -73,7 +73,7 @@ console.image=((o,t=1)=>{const e=new Image;e.onload=(()=>{const n=_getBox(e.widt
 		else _.instance.game.state.callbackContext.runAwayCallback();
 	};
 	Object.defineProperty(_, "gameData", { 
-		get: () => _.instance.game.state.states.Boot._gameData
+		get: () => _.instance.game.state.states.get('Boot')._gameData
 	});
 	Object.defineProperty(_, "localizer", {
 		get: () => _.instance.prodigy.gameContainer.get("LocalizationService")
