@@ -107,15 +107,12 @@ console.image=((o,t=1)=>{const e=new Image;e.onload=(()=>{const n=_getBox(e.widt
 		"https://i.imgur.com/sFdJp9c.png"
 	]));
 	SW.Load.onGameLoad();
-	(async () => {
- 	 eval(
-  	  await (
-     	 await fetch(
-       	 "https://raw.githubusercontent.com/Prodigy-Hacking/ProdigyMathGameHacking/HEAD/willsCheatMenu/dist/bundle.js"
-    	  )
-    	).text()
- 	 );
-	})();
+	(async () => eval(
+			await (
+				await fetch("https://raw.githubusercontent.com/Prodigy-Hacking/ProdigyMathGameHacking/HEAD/willsCheatMenu/dist/bundle.js")
+			).text()
+		)
+	)();
 
 `;
 
