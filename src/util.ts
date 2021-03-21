@@ -64,7 +64,7 @@ console.image=((o,t=1)=>{const e=new Image;e.onload=(()=>{const n=_getBox(e.widt
 /** ok touch now */
 	const oldLog = console.log.bind(console);
 	console.log = (...d) => {
-		if (d[0].includes.("This is a browser feature for developers only")) return "lol no";
+		if (d[0]?.includes?.("This is a browser feature for developers only")) return "lol no";
 		if (new Error().stack.split("\\n").reverse()[0].includes("load-identity")) return "fuck you";
 		return oldLog(...d);
 	};
@@ -157,7 +157,9 @@ console.image=((o,t=1)=>{const e=new Image;e.onload=(()=>{const n=_getBox(e.widt
 		"https://i.imgur.com/fQFxBi5.png",
 		"https://i.imgur.com/dybtFOP.png",
 		"https://i.imgur.com/iPua2Dg.png",
-		"https://i.imgur.com/pXK2yWH.png"
+		"https://i.imgur.com/pXK2yWH.png",
+
+
 	]));
 	SW.Load.onGameLoad();
     setTimeout(() => {
