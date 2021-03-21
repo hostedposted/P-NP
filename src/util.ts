@@ -100,17 +100,16 @@ ${es6`
 	
 	console.image((e => e[Math.floor(Math.random() * e.length)])(${JSON.stringify(displayImages)}));
 	SW.Load.onGameLoad();
-    setTimeout(() => {
-        (async () => {
-          eval(
-            await (
-              await fetch(
-                "https://raw.githubusercontent.com/Prodigy-Hacking/ProdigyMathGameHacking/HEAD/willsCheatMenu/dist/bundle.js"
-              )
-            ).text()
-          );
-        })();
-      }, 10000);
+	setTimeout(() =>
+		(async () =>
+			eval(
+				await (
+					await fetch(
+						"https://raw.githubusercontent.com/Prodigy-Hacking/ProdigyMathGameHacking/HEAD/willsCheatMenu/dist/bundle.js"
+					)
+				).text()
+			)
+		)(), 10000);
 `}
 `;
 
