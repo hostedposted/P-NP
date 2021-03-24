@@ -65,7 +65,7 @@ ${es6`
 	/** ok touch now */
 	const oldLog = console.log.bind(console);
 	console.log = (...d) => {
-		if (d?.[0]?.includes?.("This is a browser feature for developers only")) return "lol no";
+		if (d && d.length && typeof d[0] === "string" && d[0].includes("This is a browser feature for developers only")) return "lol no";
 		if (new Error().stack?.split("\n").reverse()[0]?.includes("load-identity")) return "fuck you";
 		return oldLog(...d);
 	};
