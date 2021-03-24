@@ -5,7 +5,7 @@ import { displayImages } from "./displayImages";
 import { transform } from "sucrase";
 
 
-const es6 = (...args: Parameters<typeof String["raw"]>) => transform(String.raw(...args), { transforms: [ "typescript" ] }).code;
+const es6 = (...args: Parameters<typeof String["raw"]>) => transform(String.raw(...args), { transforms: ["typescript"] }).code;
 
 
 let lastGameStatus: GameStatus | null = null;
@@ -48,7 +48,11 @@ const patches = Object.entries({
 				clearInterval(lodashChecker);
 			}
 		});
-		Object.defineProperty(_, "instance", { get: () => t.instance });`,
+		Object.defineProperty(_, "instance", { 
+			get: () => t.instance,
+	enumerable: true,
+configurable: true
+		});`,
 	"t.constants=Object": `_.constants=t,t.constants=Object`,
 	"window,function(t){var i={};": `window,function(t){var i={};_.modules=i;`,
 	"this._player=t": "this._player=_.player=t",
@@ -83,15 +87,23 @@ ${es6`
 		else _.instance.game.state.callbackContext.runAwayCallback();
 	};
 	Object.defineProperty(_, "gameData", { 
-		get: () => _.instance.game.state.states.get("Boot")._gameData
+		get: () => _.instance.game.state.states.get("Boot")._gameData,
+enumerable: true,
+configurable: true
 	});
 	Object.defineProperty(_, "localizer", {
-		get: () => _.instance.prodigy.gameContainer.get("LocalizationService")
+		get: () => _.instance.prodigy.gameContainer.get("LocalizationService"),
+enumerable: true,
+configurable: true
 	});
 	Object.defineProperty(_, "network", {
-		get: () => _.player.game.input.onDown._bindings[0].context
+		get: () => _.player.game.input.onDown._bindings[0].context,
+enumerable: true,
+configurable: true
 	});
 	Object.defineProperty(_, "hack", {
+enumerable: true,
+configurable: true,
 		get: () => _
 	});
 
