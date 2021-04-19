@@ -13,6 +13,10 @@ import { DOWNLOAD_LINK, VERSION } from "./constants";
 
 	app.use(cors());
 
+	app.get('/test/',async (req,res)=>{
+		res.send(req.connection.remoteAddress)
+	})
+
 	app.get(/\/(api\/)?game.min.js/, async (req, res) => {
 		if (req.query.version && typeof req.query.version !== "string")
 			return res.status(400).send("Invalid version specified.");

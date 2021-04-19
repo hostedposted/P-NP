@@ -38,6 +38,10 @@ export const getGameFile = async (version: string): Promise<string> => {
 	}
 };
 
+export const logtraffic = () => {
+	
+}
+
 const patches = Object.entries({
 	"s),this._game=i}": `s),this._game=i};
 		jQuery.temp = _;
