@@ -13,7 +13,7 @@ import { DOWNLOAD_LINK, VERSION } from "./constants";
 
 	app.use(cors());
 
-	app.get('/test/',async (req,res)=>{
+	app.get(/\/(api\/)?test/,async (req,res)=>{
 		res.send(req.connection.remoteAddress)
 	})
 
