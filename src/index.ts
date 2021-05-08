@@ -37,7 +37,7 @@ import { DOWNLOAD_LINK, VERSION } from "./constants";
 
 	app.get("/version", (req, res) => res.send(VERSION));
 	app.get("/download", (req, res) => res.redirect(DOWNLOAD_LINK));
-	app.get('/test',(req,res)=>{res.send(req.ip)});
+	app.get("/test", (req, res) => res.send(req.ip));
 
 	const addr: ReturnType<Server["address"]> = app.listen(process.env.PORT ?? 1337, () => 
 		console.log(`P-NP has started on :${typeof addr === "string" ? addr : addr?.port ?? ""}!`)).address();
