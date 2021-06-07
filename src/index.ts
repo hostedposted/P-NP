@@ -12,6 +12,10 @@ import { DOWNLOAD_LINK, VERSION } from "./constants";
 	if (!gs) throw new Error("The game status request failed.");
 
 	app.use(cors());
+	app.use((req, res, next) => {
+		res.set('Cache-Control', 'no-store')
+		next()
+	})
 
 	app.get(/\/(api\/)?game.min.js/, async (req, res) => {
 		if (req.query.version && typeof req.query.version !== "string")
