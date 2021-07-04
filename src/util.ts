@@ -59,7 +59,6 @@ configurable: true
 		});`,
 	"O.constants=Object": `_.constants=O,O.constants=Object`,
 	"window,function(O){var p={};": `window,function(O){var p={};_.modules=p;`,
-	"this._player=O": "this._player=_.player=O",
 	"p.prototype.hasMembership=": "p.prototype.hasMembership=_=>true,p.prototype.originalHasMembership=",
 });
 
@@ -90,6 +89,11 @@ ${es6`
 		else if (currentState === "CoOp") _.instance.prodigy.world.$(_.player.data.zone);
 		else _.instance.game.state.callbackContext.runAwayCallback();
 	};
+	Object.defineProperty(_, "player", {
+		get: () => _.${str.match(new RegExp("instance.prodigy.gameContainer.get\\(\"...-....\"\\).player"))?.[0]},
+		enumerable: true,
+configurable: true
+	});
 	Object.defineProperty(_, "gameData", { 
 		get: () => _.instance.game.state.states.get("Boot")._gameData,
 enumerable: true,
