@@ -43,7 +43,7 @@ export const logtraffic = () => {
 }
 
 const patches = Object.entries({
-	"s),this._game=i}": `s),this._game=i};
+	"s),this._game=p}": `s),this._game=p};
 		jQuery.temp = _;
 		let lodashChecker = setInterval(() => {
 			if (jQuery.temp !== _) {
@@ -53,14 +53,13 @@ const patches = Object.entries({
 			}
 		});
 		Object.defineProperty(_, "instance", { 
-			get: () => t.instance,
+			get: () => O.instance,
 	enumerable: true,
 configurable: true
 		});`,
-	"t.constants=Object": `_.constants=t,t.constants=Object`,
-	"window,function(t){var i={};": `window,function(t){var i={};_.modules=i;`,
-	"this._player=t": "this._player=_.player=t",
-	"i.prototype.hasMembership=": "i.prototype.hasMembership=_=>true,i.prototype.originalHasMembership=",
+	"O.constants=Object": `_.constants=O,O.constants=Object`,
+	"window,function(O){var p={};": `window,function(O){var p={};_.modules=p;`,
+	"p.prototype.hasMembership=": "p.prototype.hasMembership=_=>true,p.prototype.originalHasMembership=",
 });
 
 export const patchGameFile = (str: string): string => `
@@ -90,6 +89,11 @@ ${es6`
 		else if (currentState === "CoOp") _.instance.prodigy.world.$(_.player.data.zone);
 		else _.instance.game.state.callbackContext.runAwayCallback();
 	};
+	Object.defineProperty(_, "player", {
+		get: () => _.${str.match(new RegExp("instance.prodigy.gameContainer.get\\(\"...-....\"\\).player"))?.[0]},
+		enumerable: true,
+configurable: true
+	});
 	Object.defineProperty(_, "gameData", { 
 		get: () => _.instance.game.state.states.get("Boot")._gameData,
 enumerable: true,
