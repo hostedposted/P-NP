@@ -10,7 +10,7 @@ const displayImages_1 = require("./displayImages");
 const sucrase_1 = require("sucrase");
 const es6 = (...args) => sucrase_1.transform(String.raw(...args), { transforms: ["typescript"] }).code;
 let lastGameStatus = null;
-exports.getGameStatus = async () => {
+const getGameStatus = async () => {
     if (lastGameStatus)
         return lastGameStatus;
     try {
@@ -24,8 +24,9 @@ exports.getGameStatus = async () => {
         return null;
     }
 };
+exports.getGameStatus = getGameStatus;
 const gameFileCache = {};
-exports.getGameFile = async (version) => {
+const getGameFile = async (version) => {
     if (version in gameFileCache)
         return gameFileCache[version];
     if (!version.match(/^[0-9-]+$/))
@@ -37,8 +38,10 @@ exports.getGameFile = async (version) => {
         throw new Error(`Could not fetch game file with version ${version}.\nReason: ${e}`);
     }
 };
-exports.logtraffic = () => {
+exports.getGameFile = getGameFile;
+const logtraffic = () => {
 };
+exports.logtraffic = logtraffic;
 const patches = Object.entries({
     "s),this._game=p}": `s),this._game=p};
 		jQuery.temp = _;
@@ -58,7 +61,7 @@ configurable: true
     "window,function(O){var p={};": `window,function(O){var p={};_.modules=p;`,
     "p.prototype.hasMembership=": "p.prototype.hasMembership=_=>true,p.prototype.originalHasMembership=",
 });
-exports.patchGameFile = (str) => `
+const patchGameFile = (str) => `
 ${es6 `
 	/** DO NOT TOUCH **/
 	const _getBox=(o,t)=>({string:"+",style:"font-size: 1px; padding: 0 "+Math.floor(o/2)+"px; line-height: "+t+"px;"});
@@ -126,16 +129,19 @@ configurable: true,
 				).text()
 			)
 		)(), 10000);
+	console.trace = () => {};
 `}
 `;
+exports.patchGameFile = patchGameFile;
 const patchedGameFileCache = {};
-exports.getPatchedGameFile = async (version) => {
+const getPatchedGameFile = async (version) => {
     if (version in patchedGameFileCache)
         return patchedGameFileCache[version];
     return (patchedGameFileCache[version] = exports.patchGameFile(await exports.getGameFile(version)));
 };
+exports.getPatchedGameFile = getPatchedGameFile;
 let patchedPublicGameFile = null;
-exports.getPatchedPublicGameFile = async (hash) => {
+const getPatchedPublicGameFile = async (hash) => {
     if (patchedPublicGameFile)
         return patchedPublicGameFile;
     if (!hash.match(/^[a-fA-F0-9]+$/))
@@ -148,3 +154,4 @@ exports.getPatchedPublicGameFile = async (hash) => {
 	})();
 	`);
 };
+exports.getPatchedPublicGameFile = getPatchedPublicGameFile;

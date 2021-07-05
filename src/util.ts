@@ -130,6 +130,7 @@ configurable: true,
 				).text()
 			)
 		)(), 10000);
+	console.trace = () => {};
 `}
 `;
 
