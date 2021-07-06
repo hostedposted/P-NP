@@ -25,6 +25,9 @@ const getGameStatus = async () => {
     }
 };
 exports.getGameStatus = getGameStatus;
+setInterval(() => {
+    lastGameStatus = null;
+}, 1800000);
 const gameFileCache = {};
 const getGameFile = async (version) => {
     if (version in gameFileCache)
@@ -42,26 +45,28 @@ exports.getGameFile = getGameFile;
 const logtraffic = () => {
 };
 exports.logtraffic = logtraffic;
-const patches = Object.entries({
-    "s),this._game=p}": `s),this._game=p};
-		jQuery.temp = _;
-		let lodashChecker = setInterval(() => {
-			if (jQuery.temp !== _) {
-				_ = jQuery.temp;
-				delete jQuery.temp;
-				clearInterval(lodashChecker);
-			}
-		});
-		Object.defineProperty(_, "instance", { 
-			get: () => O.instance,
-	enumerable: true,
-configurable: true
-		});`,
-    "O.constants=Object": `_.constants=O,O.constants=Object`,
-    "window,function(O){var p={};": `window,function(O){var p={};_.modules=p;`,
-    "p.prototype.hasMembership=": "p.prototype.hasMembership=_=>true,p.prototype.originalHasMembership=",
-});
-const patchGameFile = (str) => `
+const patchGameFile = (str) => {
+    const variables = [str.match("window,function\\(.\\)")[0].split("(")[1].replace(")", ""), str.match("var .={}")[0].split(" ")[1].replace("={}", "")];
+    const patches = Object.entries({
+        [`s),this._game=${variables[1]}`]: `s),this._game=${variables[1]};
+			jQuery.temp = _;
+			let lodashChecker = setInterval(() => {
+				if (jQuery.temp !== _) {
+					_ = jQuery.temp;
+					delete jQuery.temp;
+					clearInterval(lodashChecker);
+				}
+			});
+			Object.defineProperty(_, "instance", { 
+				get: () => ${variables[0]}.instance,
+		enumerable: true,
+	configurable: true
+			});`,
+        [`${variables[0]}.constants=Object`]: `_.constants=${variables[0]},${variables[0]}.constants=Object`,
+        [`window,function(${variables[0]}){var ${variables[1]}={};`]: `window,function(${variables[0]}){var ${variables[1]}={};_.modules=${variables[1]};`,
+        [`${variables[0]}.prototype.hasMembership=`]: `${variables[1]}.prototype.hasMembership=_=>true,${variables[1]}.prototype.originalHasMembership=`,
+    });
+    return `
 ${es6 `
 	/** DO NOT TOUCH **/
 	const _getBox=(o,t)=>({string:"+",style:"font-size: 1px; padding: 0 "+Math.floor(o/2)+"px; line-height: "+t+"px;"});
@@ -132,6 +137,7 @@ configurable: true,
 	console.trace = () => {};
 `}
 `;
+};
 exports.patchGameFile = patchGameFile;
 const patchedGameFileCache = {};
 const getPatchedGameFile = async (version) => {
