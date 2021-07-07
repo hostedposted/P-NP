@@ -47,7 +47,7 @@ export const logtraffic = () => {
 }
 
 export const patchGameFile = (str: string): string => {
-	const variables = [str.match("window,function\\(.\\)")![0].split("(")[1].replace(")", ""), str.match("var .={}")![0].split(" ")[1].replace("={}", "")] as string[];
+	const variables = [str.match(/window,function\((.)/)![1], str.match(/var (.)={}/)![1]] as string[];
 	const patches = Object.entries({
 		[`s),this._game=${variables![1]}`]: `s),this._game=${variables![1]};
 			jQuery.temp = _;
