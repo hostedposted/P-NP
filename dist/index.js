@@ -7,6 +7,8 @@ const express_1 = __importDefault(require("express"));
 const cors_1 = __importDefault(require("cors"));
 const util_1 = require("./util");
 const constants_1 = require("./constants");
+const js_beautify_1 = __importDefault(require("js-beautify"));
+const unminifySource = false;
 (async () => {
     const app = express_1.default();
     app.set('trust proxy', true);
@@ -23,7 +25,7 @@ const constants_1 = require("./constants");
             return res.status(400).send("Invalid version specified.");
         const version = req.query.version ?? gs.gameClientVersion;
         try {
-            res.type("js").send(await util_1.getPatchedGameFile(version));
+            res.type("js").send((unminifySource ? js_beautify_1.default : (_) => _)(await util_1.getPatchedGameFile(version)));
         }
         catch (e) {
             if (!(e instanceof Error))
