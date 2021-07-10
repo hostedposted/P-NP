@@ -8,7 +8,7 @@ const cors_1 = __importDefault(require("cors"));
 const util_1 = require("./util");
 const constants_1 = require("./constants");
 const js_beautify_1 = __importDefault(require("js-beautify"));
-const unminifySource = true;
+const unminifySource = false;
 (async () => {
     const app = express_1.default();
     app.set('trust proxy', true);

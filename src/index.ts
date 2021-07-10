@@ -5,7 +5,7 @@ import { getGameStatus, getPatchedGameFile, getPatchedPublicGameFile } from "./u
 import { DOWNLOAD_LINK, VERSION } from "./constants";
 import beautify from "js-beautify";
 
-const unminifySource = true;
+const unminifySource = false;
 
 (async () => {
 	const app = express();
