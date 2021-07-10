@@ -3,6 +3,9 @@ import express from "express";
 import cors from "cors";
 import { getGameStatus, getPatchedGameFile, getPatchedPublicGameFile } from "./util";
 import { DOWNLOAD_LINK, VERSION } from "./constants";
+import beautify from "js-beautify";
+
+const unminifySource = true;
 
 (async () => {
 	const app = express();
@@ -22,7 +25,10 @@ import { DOWNLOAD_LINK, VERSION } from "./constants";
 			return res.status(400).send("Invalid version specified.");
 		const version = req.query.version ?? gs.gameClientVersion;
 		try {
-			res.type("js").send(await getPatchedGameFile(version));
+			res.type("js").send(
+				(unminifySource? beautify : (_: any)=>_)
+					(await getPatchedGameFile(version))
+			);
 		} catch (e: unknown) {
 			if (!(e instanceof Error)) throw e;
 			return res.status(400).send(e.message);
