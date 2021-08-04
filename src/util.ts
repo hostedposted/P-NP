@@ -50,21 +50,21 @@ export const patchGameFile = (str: string): string => {
 	const variables = [str.match(/window,function\((.)/)![1], str.match(/var (.)={}/)![1]] as string[];
 	const patches = Object.entries({
 		[`s),this._game=${variables![1]}`]: `s),this._game=${variables![1]};
-			jQuery.temp = _;
+			jQuery.temp = window._;
 			let lodashChecker = setInterval(() => {
-				if (jQuery.temp !== _) {
-					_ = jQuery.temp;
+				if (jQuery.temp !== window._) {
+					window._ = jQuery.temp;
 					delete jQuery.temp;
 					clearInterval(lodashChecker);
 				}
 			});
-			Object.defineProperty(_, "instance", { 
+			Object.defineProperty(window._, "instance", { 
 				get: () => ${variables![0]}.instance,
 		enumerable: true,
 	configurable: true
 			});`,
-		[`${variables![0]}.constants=Object`]: `_.constants=${variables![0]},${variables![0]}.constants=Object`,
-		[`window,function(${variables![0]}){var ${variables![1]}={};`]: `window,function(${variables![0]}){var ${variables![1]}={};_.modules=${variables![1]};`,
+		[`${variables![0]}.constants=Object`]: `window._.constants=${variables![0]},${variables![0]}.constants=Object`,
+		[`window,function(${variables![0]}){var ${variables![1]}={};`]: `window,function(${variables![0]}){var ${variables![1]}={};window._.modules=${variables![1]};`,
 		[`${variables![0]}.prototype.hasMembership=`]: `${variables![1]}.prototype.hasMembership=_=>true,${variables![1]}.prototype.originalHasMembership=`,
 	});
 	return `
