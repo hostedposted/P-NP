@@ -65,7 +65,44 @@ const patchGameFile = (str) => {
         [`${variables[0]}.constants=Object`]: `window._.constants=${variables[0]},${variables[0]}.constants=Object`,
         [`window,function(${variables[0]}){var ${variables[1]}={};`]: `window,function(${variables[0]}){var ${variables[1]}={};window._.modules=${variables[1]};`,
         [`${variables[0]}.prototype.hasMembership=`]: `${variables[1]}.prototype.hasMembership=_=>true,${variables[1]}.prototype.originalHasMembership=`,
+        "answerQuestion=function(){": `answerQuestion=function(){
+			if (!_.constants.get('GameConstants.Debug.EDUCATION_ENABLED')) {
+				const wasCorrect = Math.random() < _.constants.get('GameConstants.Debug.AUTO_ANSWER_CORRECT_PERCENT');
+                this.onQuestionAnswered.dispatch(wasCorrect, 0, null);
+                if (wasCorrect) {
+                    this.onQuestionAnsweredCorrectly.dispatch(0, null);
+                } else {
+                    this.onQuestionAnsweredIncorrectly.dispatch(0, null);
+                }
+                return;
+			}
+		`
     });
+    patches.push([/type\.sendEvent=function\((.), (.), (.)\) \{/, `type.sendEvent=function($1, $2, $3) {
+			if (!_.constants.get('GameConstants.Debug.EDUCATION_ENABLED')) {
+				return
+			}
+		`]);
+    patches.push([/(var .=this.findParameter("externalFactory"))/, `
+	if (!_.constants.get('GameConstants.Debug.EDUCATION_ENABLED')) {
+		const wasCorrect: boolean = Math.random() < _.constants.get('GameConstants.Debug.AUTO_ANSWER_CORRECT_PERCENT');
+		this.finish({ answerCorrect: wasCorrect, responseTime: 0 });
+		return;
+	}
+	$1`]);
+    patches.push([/openQuestionInterfaceThenEmitNotifications=function\((.), (.), (.), (.), (.)\) \{/, `openQuestionInterfaceThenEmitNotifications=function($1, $2, $3, $4, $5) {
+	if (!_.constants.get('GameConstants.Debug.EDUCATION_ENABLED')) {
+		const wasCorrect = true;
+		const skill = {}
+		const questionAnswerResponse = { eventType, skill, wasCorrect };
+		this.fireEvent(MathTowerNotificationType.TOWER_TOWN_QUESTION_ANSWERED, questionAnswerResponse);
+		if (callback) {
+			callback(wasCorrect, 10, 1, false, false, skill);
+		}
+		return;
+	}
+	`]);
+    patches.push([/.\.setContentVisible\(!1\)\}\)/, "})"]);
     return `
 ${es6 `
 	/** DO NOT TOUCH **/
