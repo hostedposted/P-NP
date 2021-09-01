@@ -9,8 +9,12 @@ const constants_1 = require("./constants");
 const displayImages_1 = require("./displayImages");
 const sucrase_1 = require("sucrase");
 const es6 = (...args) => sucrase_1.transform(String.raw(...args), { transforms: ["typescript"] }).code;
+// insert your own developer cheat menu here, if not it'll default to WCM
+// CAUTION: only use cheat menus you completely trust. cheat menus have complete access
+const cheatMenuLink = ""
+    || "https://raw.githubusercontent.com/Prodigy-Hacking/ProdigyMathGameHacking/HEAD/willsCheatMenu/dist/bundle.js";
 let lastGameStatus = null;
-const getGameStatus = async () => {
+exports.getGameStatus = async () => {
     if (lastGameStatus)
         return lastGameStatus;
     try {
@@ -24,15 +28,14 @@ const getGameStatus = async () => {
         return null;
     }
 };
-exports.getGameStatus = getGameStatus;
 setInterval(() => {
     lastGameStatus = null;
-}, 1800000);
+}, 30 * 60 * 1000); // 30 minutes
 const gameFileCache = {};
-const getGameFile = async (version) => {
+exports.getGameFile = async (version) => {
     if (version in gameFileCache)
         return gameFileCache[version];
-    if (!version.match(/^[0-9-]+$/))
+    if (!version.match(/^[0-9-.]+$/))
         throw new Error("Invalid version specified.");
     try {
         return (gameFileCache[version] = await (await node_fetch_1.default(`https://code.prodigygame.com/code/${version}/game.min.js?v=${version}`)).text());
@@ -41,11 +44,9 @@ const getGameFile = async (version) => {
         throw new Error(`Could not fetch game file with version ${version}.\nReason: ${e}`);
     }
 };
-exports.getGameFile = getGameFile;
-const logtraffic = () => {
+exports.logtraffic = () => {
 };
-exports.logtraffic = logtraffic;
-const patchGameFile = (str) => {
+exports.patchGameFile = (str) => {
     const variables = [str.match(/window,function\((.)/)[1], str.match(/var (.)={}/)[1]];
     const patches = Object.entries({
         [`s),this._game=${variables[1]}`]: `s),this._game=${variables[1]};
@@ -166,7 +167,7 @@ configurable: true,
 			eval(
 				await (
 					await fetch(
-						"https://raw.githubusercontent.com/Prodigy-Hacking/ProdigyMathGameHacking/HEAD/willsCheatMenu/dist/bundle.js"
+						"${cheatMenuLink}"
 					)
 				).text()
 			)
@@ -175,16 +176,14 @@ configurable: true,
 `}
 `;
 };
-exports.patchGameFile = patchGameFile;
 const patchedGameFileCache = {};
-const getPatchedGameFile = async (version) => {
+exports.getPatchedGameFile = async (version) => {
     if (version in patchedGameFileCache)
         return patchedGameFileCache[version];
     return (patchedGameFileCache[version] = exports.patchGameFile(await exports.getGameFile(version)));
 };
-exports.getPatchedGameFile = getPatchedGameFile;
 let patchedPublicGameFile = null;
-const getPatchedPublicGameFile = async (hash) => {
+exports.getPatchedPublicGameFile = async (hash) => {
     if (patchedPublicGameFile)
         return patchedPublicGameFile;
     if (!hash.match(/^[a-fA-F0-9]+$/))
@@ -197,4 +196,3 @@ const getPatchedPublicGameFile = async (hash) => {
 	})();
 	`);
 };
-exports.getPatchedPublicGameFile = getPatchedPublicGameFile;

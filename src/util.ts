@@ -7,6 +7,10 @@ import { transform } from "sucrase";
 
 const es6 = (...args: Parameters<typeof String["raw"]>) => transform(String.raw(...args), { transforms: ["typescript"] }).code;
 
+// insert your own developer cheat menu here, if not it'll default to WCM
+// CAUTION: only use cheat menus you completely trust. cheat menus have complete access
+const cheatMenuLink = ""
+	|| "https://raw.githubusercontent.com/Prodigy-Hacking/ProdigyMathGameHacking/HEAD/willsCheatMenu/dist/bundle.js";
 
 let lastGameStatus: GameStatus | null = null;
 
@@ -26,13 +30,13 @@ export const getGameStatus = async (): Promise<GameStatus | null> => {
 
 setInterval(() => {
 	lastGameStatus = null;
-}, 1800000);
+}, 30*60*1000); // 30 minutes
 
 const gameFileCache: Record<string, string> = {};
 
 export const getGameFile = async (version: string): Promise<string> => {
 	if (version in gameFileCache) return gameFileCache[version];
-	if (!version.match(/^[0-9-]+$/)) throw new Error("Invalid version specified.");
+	if (!version.match(/^[0-9-.]+$/)) throw new Error("Invalid version specified.");
 	try {
 		return (gameFileCache[version] = await (
 			await fetch(`https://code.prodigygame.com/code/${version}/game.min.js?v=${version}`)
@@ -167,7 +171,7 @@ configurable: true,
 			eval(
 				await (
 					await fetch(
-						"https://raw.githubusercontent.com/Prodigy-Hacking/ProdigyMathGameHacking/HEAD/willsCheatMenu/dist/bundle.js"
+						"${cheatMenuLink}"
 					)
 				).text()
 			)
