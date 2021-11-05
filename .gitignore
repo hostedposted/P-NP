@@ -107,3 +107,4 @@ package-lock.json
 pnpm-lock.yaml
 p-np-macos
 p-np-win.exe
+p-np-linux
