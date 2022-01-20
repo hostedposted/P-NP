@@ -4,7 +4,7 @@ import cors from "cors";
 import { getGameStatus, getPatchedGameFile, getPatchedPublicGameFile } from "./util";
 import { DOWNLOAD_LINK, VERSION } from "./constants";
 import beautify from "js-beautify";
-
+import fs from 'fs';
 const unminifySource = false;
 
 (async () => {
@@ -26,7 +26,7 @@ const unminifySource = false;
 		const version = req.query.version ?? gs.gameClientVersion;
 		try {
 			res.type("js").send(
-				(unminifySource? beautify : (_: any)=>_)
+				(unminifySource ? beautify : (_: any) => _)
 					(await getPatchedGameFile(version))
 			);
 		} catch (e: unknown) {
@@ -34,7 +34,7 @@ const unminifySource = false;
 			return res.status(400).send(e.message);
 		}
 	});
-	app.get(/\/(api\/)?public-game.min.js/, async(req, res) => {
+	app.get(/\/(api\/)?public-game.min.js/, async (req, res) => {
 		if (typeof req.query.hash !== "string")
 			return res.status(400).send("No hash specified.");
 		try {
@@ -47,8 +47,58 @@ const unminifySource = false;
 
 	app.get("/version", (req, res) => res.send(VERSION));
 	app.get("/download", (req, res) => res.redirect(DOWNLOAD_LINK));
-	app.get("/test", (req, res) => res.send(req.ip));
+	app.post("/hit", (req, res) => {
+		let current = { "ip": req.ip, timestamp: Date.now() }
+		let data = JSON.parse(fs.readFileSync('../hits.json', 'utf8'))
+		data.push(current)
+		fs.writeFileSync('../hits.json', JSON.stringify(data))
+		res.status(200)
+		res.send({ "status": "success", "data": current })
+	});
+	app.get("/stats", (req, res) => {
+		let data = JSON.parse(fs.readFileSync('../hits.json', 'utf8'))
 
-	const addr: ReturnType<Server["address"]> = app.listen(process.env.PORT ?? 1337, () => 
+		let validate = (a: any, b: any) => {
+
+
+			return a.getFullYear() === b.getFullYear() &&
+				a.getMonth() === b.getMonth() &&
+				a.getDate() === b.getDate();
+
+		}
+
+		res.send({
+
+			total: data.length,
+			uniques: [...new Set(data.flatMap(({ ip }: { ip: any }) => ip))].sort().length,
+			timeData: {
+
+				today: {
+
+					count: (data.map((x: any) => {
+						if (validate(new Date(), new Date(x.timestamp))) {
+
+							return x
+
+						}
+					}).filter(Boolean)).length,
+					uniques:
+						[...new Set((data.map((x: any) => {
+							if (validate(new Date(), new Date(x.timestamp))) {
+
+								return x
+
+							}
+						}).filter(Boolean)).flatMap(({ ip }: { ip: any }) => ip))].sort().length
+
+				}
+
+
+
+			}
+		})
+	});
+
+	const addr: ReturnType<Server["address"]> = app.listen(process.env.PORT ?? 1337, () =>
 		console.log(`P-NP has started on :${typeof addr === "string" ? addr : addr?.port ?? ""}!`)).address();
 })();
