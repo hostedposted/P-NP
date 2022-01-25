@@ -17,7 +17,7 @@ let lastGameStatus: GameStatus | null = null;
 export const getGameStatus = async (): Promise<GameStatus | null> => {
 	if (lastGameStatus) return lastGameStatus;
 	try {
-		const json = (await (await fetch("https://play.prodigygame.com/play")).text()).match(
+		const json = (await (await fetch("https://math.prodigygame.com/play?launcher=true")).text()).match(
 			/(?<=gameStatusDataStr = ').+(?=')/
 		);
 		if (!json?.length) return null;
