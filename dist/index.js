@@ -58,26 +58,39 @@ const unminifySource = false;
     });
     app.get("/stats", (req, res) => {
         let data = JSON.parse(fs_1.default.readFileSync('../hits.json', 'utf8'));
-        let validate = (a, b) => {
-            return a.getFullYear() === b.getFullYear() &&
-                a.getMonth() === b.getMonth() &&
-                a.getDate() === b.getDate();
+        let validate = (a, b, type) => {
+            switch (type) {
+                case "day":
+                    return a.getFullYear() === b.getFullYear() &&
+                        a.getMonth() === b.getMonth() &&
+                        a.getDate() === b.getDate();
+                    break;
+                case "week":
+                    return a.getFullYear() === b.getFullYear() &&
+                        a.getMonth() === b.getMonth() &&
+                        Math.ceil((a.getDate() - 1 - a.getDay()) / 7) === Math.ceil((b.getDate() - 1 - b.getDay()) / 7);
+                    break;
+                case "month":
+                    return a.getFullYear() === b.getFullYear() &&
+                        a.getMonth() === b.getMonth();
+                    break;
+            }
         };
         res.send({
             total: data.length,
             uniques: [...new Set(data.flatMap(({ ip }) => ip))].sort().length,
             timeData: {
-                today: {
-                    count: (data.map((x) => {
-                        if (validate(new Date(), new Date(x.timestamp))) {
+                // @ts-ignore
+                recent: ["day", "week", "month"].map((y) => { return [y, { count: data.map((x) => { if (validate(new Date(), new Date(x.timestamp), y)) {
                             return x;
-                        }
-                    }).filter(Boolean)).length,
-                    uniques: [...new Set((data.map((x) => {
-                            if (validate(new Date(), new Date(x.timestamp))) {
+                        } }).filter(Boolean).length, uniques: [...(data.map((x) => { if (validate(new Date(), new Date(x.timestamp), y)) {
                                 return x;
-                            }
-                        }).filter(Boolean)).flatMap(({ ip }) => ip))].sort().length
+                            } }).filter(Boolean)).map(x => x.ip).reduce((acc, e) => acc.set(e, (acc.get(e) || 0) + 1), new Map()).keys()].length },]; }).reduce((o, v, i) => { return (o[v[0]] = v.slice(1)[0]), o; }, {}),
+                analysis: {
+                    // @ts-ignore
+                    day: new Array(new Date(new Date().getYear(), new Date().getMonth(), 0).getDate()).fill().slice(0, new Date().getDate()).map((a, index) => index + 1).map((x, index) => { return [`${new Date().getMonth() + 1}/${index + 1}`, data.filter(y => { return new Date(y.timestamp).getFullYear() === new Date().getFullYear() && new Date(y.timestamp).getMonth() === new Date().getMonth() && new Date(y.timestamp).getDate() === x; }).length]; }),
+                    //@ts-ignore
+                    month: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'].slice(0, new Date().getMonth() + 1).map((x, m) => { return [x, data.filter((y) => { return new Date(y.timestamp).getYear() === new Date().getYear() && new Date(y.timestamp).getMonth() === m; }).length]; })
                 }
             }
         });
