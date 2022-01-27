@@ -11,12 +11,12 @@ const js_beautify_1 = __importDefault(require("js-beautify"));
 const fs_1 = __importDefault(require("fs"));
 const unminifySource = false;
 (async () => {
-    const app = (0, express_1.default)();
+    const app = express_1.default();
     app.set('trust proxy', true);
-    const gs = await (0, util_1.getGameStatus)();
+    const gs = await util_1.getGameStatus();
     if (!gs)
         throw new Error("The game status request failed.");
-    app.use((0, cors_1.default)());
+    app.use(cors_1.default());
     app.use((req, res, next) => {
         res.set('Cache-Control', 'no-store');
         next();
@@ -26,7 +26,7 @@ const unminifySource = false;
             return res.status(400).send("Invalid version specified.");
         const version = req.query.version ?? gs.gameClientVersion;
         try {
-            res.type("js").send((unminifySource ? js_beautify_1.default : (_) => _)(await (0, util_1.getPatchedGameFile)(version)));
+            res.type("js").send((unminifySource ? js_beautify_1.default : (_) => _)(await util_1.getPatchedGameFile(version)));
         }
         catch (e) {
             if (!(e instanceof Error))
@@ -38,7 +38,7 @@ const unminifySource = false;
         if (typeof req.query.hash !== "string")
             return res.status(400).send("No hash specified.");
         try {
-            res.type("js").send(await (0, util_1.getPatchedPublicGameFile)(req.query.hash));
+            res.type("js").send(await util_1.getPatchedPublicGameFile(req.query.hash));
         }
         catch (e) {
             if (!(e instanceof Error))
