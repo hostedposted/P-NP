@@ -9,7 +9,6 @@ const util_1 = require("./util");
 const constants_1 = require("./constants");
 const js_beautify_1 = __importDefault(require("js-beautify"));
 const fs_1 = __importDefault(require("fs"));
-const forever_monitor_1 = __importDefault(require("forever-monitor"));
 const unminifySource = false;
 (async () => {
     const app = (0, express_1.default)();
@@ -58,17 +57,6 @@ const unminifySource = false;
         res.status(200);
         res.send({ "status": "success", "data": current });
     });
-    app.get("/restart", (req, res) => {
-        res.send('restarting');
-        globalThis.child = new (forever_monitor_1.default.Monitor)('dist/', {
-            silent: true,
-            args: []
-        });
-        child.start();
-        console.log(`Restarted at ${Date()}, with PID ${child.pid}`);
-        process.exit();
-    });
-    app.get("/kill", (req, res) => globalThis.child.kill);
     app.get("/stats", (req, res) => {
         let data = JSON.parse(fs_1.default.readFileSync('./hits.json', 'utf8'));
         let validate = (a, b, type) => {
