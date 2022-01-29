@@ -50,7 +50,7 @@ export const logtraffic = () => {
 	
 }
 
-export const patchGameFile = (str: string): string => {
+export const patchGameFile = (str: string, version: string): string => {
 	const variables = [str.match(/window,function\((.)/)![1], str.match(/var (.)={}/)![1]] as string[];
 	const patches: [string | RegExp, string][] = Object.entries({
 		[`s),this._game=${variables![1]}`]: `s),this._game=${variables![1]};
@@ -187,7 +187,7 @@ const patchedGameFileCache: Record<string, string> = {};
 
 export const getPatchedGameFile = async (version: string): Promise<string> => {
 	if (version in patchedGameFileCache) return patchedGameFileCache[version];
-	return (patchedGameFileCache[version] = patchGameFile(await getGameFile(version)));
+	return (patchedGameFileCache[version] = patchGameFile(await getGameFile(version), version));
 };
 
 let patchedPublicGameFile: string | null = null;

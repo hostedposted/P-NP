@@ -9,14 +9,15 @@ const util_1 = require("./util");
 const constants_1 = require("./constants");
 const js_beautify_1 = __importDefault(require("js-beautify"));
 const fs_1 = __importDefault(require("fs"));
+const forever_monitor_1 = __importDefault(require("forever-monitor"));
 const unminifySource = false;
 (async () => {
-    const app = express_1.default();
+    const app = (0, express_1.default)();
     app.set('trust proxy', true);
-    const gs = await util_1.getGameStatus();
+    const gs = await (0, util_1.getGameStatus)();
     if (!gs)
         throw new Error("The game status request failed.");
-    app.use(cors_1.default());
+    app.use((0, cors_1.default)());
     app.use((req, res, next) => {
         res.set('Cache-Control', 'no-store');
         next();
@@ -26,7 +27,8 @@ const unminifySource = false;
             return res.status(400).send("Invalid version specified.");
         const version = req.query.version ?? gs.gameClientVersion;
         try {
-            res.type("js").send((unminifySource ? js_beautify_1.default : (_) => _)(await util_1.getPatchedGameFile(version)));
+            res.type("js").send(`// game.min.js v${version}\n\n` +
+                (unminifySource ? js_beautify_1.default : (_) => _)(await (0, util_1.getPatchedGameFile)(version)));
         }
         catch (e) {
             if (!(e instanceof Error))
@@ -38,7 +40,7 @@ const unminifySource = false;
         if (typeof req.query.hash !== "string")
             return res.status(400).send("No hash specified.");
         try {
-            res.type("js").send(await util_1.getPatchedPublicGameFile(req.query.hash));
+            res.type("js").send(await (0, util_1.getPatchedPublicGameFile)(req.query.hash));
         }
         catch (e) {
             if (!(e instanceof Error))
@@ -50,14 +52,25 @@ const unminifySource = false;
     app.get("/download", (req, res) => res.redirect(constants_1.DOWNLOAD_LINK));
     app.post("/hit", (req, res) => {
         let current = { "ip": req.ip, timestamp: Date.now() };
-        let data = JSON.parse(fs_1.default.readFileSync('../hits.json', 'utf8'));
+        let data = JSON.parse(fs_1.default.readFileSync('./hits.json', 'utf8'));
         data.push(current);
-        fs_1.default.writeFileSync('../hits.json', JSON.stringify(data));
+        fs_1.default.writeFileSync('./hits.json', JSON.stringify(data));
         res.status(200);
         res.send({ "status": "success", "data": current });
     });
+    app.get("/restart", (req, res) => {
+        res.send('restarting');
+        globalThis.child = new (forever_monitor_1.default.Monitor)('dist/', {
+            silent: true,
+            args: []
+        });
+        child.start();
+        console.log(`Restarted at ${Date()}, with PID ${child.pid}`);
+        process.exit();
+    });
+    app.get("/kill", (req, res) => globalThis.child.kill);
     app.get("/stats", (req, res) => {
-        let data = JSON.parse(fs_1.default.readFileSync('../hits.json', 'utf8'));
+        let data = JSON.parse(fs_1.default.readFileSync('./hits.json', 'utf8'));
         let validate = (a, b, type) => {
             switch (type) {
                 case "day":
@@ -77,20 +90,74 @@ const unminifySource = false;
             }
         };
         res.send({
-            total: data.length,
+            count: data.length,
             uniques: [...new Set(data.flatMap(({ ip }) => ip))].sort().length,
             timeData: {
-                // @ts-ignore
                 recent: ["day", "week", "month"].map((y) => { return [y, { count: data.map((x) => { if (validate(new Date(), new Date(x.timestamp), y)) {
                             return x;
                         } }).filter(Boolean).length, uniques: [...(data.map((x) => { if (validate(new Date(), new Date(x.timestamp), y)) {
                                 return x;
                             } }).filter(Boolean)).map(x => x.ip).reduce((acc, e) => acc.set(e, (acc.get(e) || 0) + 1), new Map()).keys()].length },]; }).reduce((o, v, i) => { return (o[v[0]] = v.slice(1)[0]), o; }, {}),
                 analysis: {
-                    // @ts-ignore
-                    day: new Array(new Date(new Date().getYear(), new Date().getMonth(), 0).getDate()).fill().slice(0, new Date().getDate()).map((a, index) => index + 1).map((x, index) => { return [`${new Date().getMonth() + 1}/${index + 1}`, data.filter(y => { return new Date(y.timestamp).getFullYear() === new Date().getFullYear() && new Date(y.timestamp).getMonth() === new Date().getMonth() && new Date(y.timestamp).getDate() === x; }).length]; }),
-                    //@ts-ignore
-                    month: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'].slice(0, new Date().getMonth() + 1).map((x, m) => { return [x, data.filter((y) => { return new Date(y.timestamp).getYear() === new Date().getYear() && new Date(y.timestamp).getMonth() === m; }).length]; })
+                    day: new Array(14)
+                        .fill()
+                        .map((a, index) => {
+                        let date = new Date();
+                        let month = date.getMonth() + 1;
+                        let day = date.getDate() - index;
+                        let year = date.getFullYear();
+                        if (day < 1) {
+                            day = new Date(date.getYear(), date.getMonth(), 0).getDate() + day;
+                            --month;
+                        }
+                        if (month < 1) {
+                            month = 12;
+                            year--;
+                        }
+                        return { month: month, day: day, year: year };
+                    }).reverse().map(x => {
+                        return [
+                            `${x.month}/${x.day}`,
+                            {
+                                count: data.filter((y) => {
+                                    return (new Date(y.timestamp).getFullYear() === x.year &&
+                                        new Date(y.timestamp).getMonth() + 1 === x.month &&
+                                        new Date(y.timestamp).getDate() === x.day);
+                                }).length,
+                                uniques: [...new Set(data.filter((y) => {
+                                        return (new Date(y.timestamp).getFullYear() === x.year &&
+                                            new Date(y.timestamp).getMonth() + 1 === x.month &&
+                                            new Date(y.timestamp).getDate() === x.day);
+                                    }).flatMap(({ ip }) => ip))].sort().length
+                            },
+                        ];
+                    }),
+                    month: new Array(12)
+                        .fill()
+                        .map((a, index) => {
+                        let date = new Date();
+                        let month = date.getMonth() - (index - 1);
+                        let year = date.getFullYear();
+                        if (month < 1) {
+                            month = 12 + month;
+                            --year;
+                        }
+                        return { month: month, year: year };
+                    }).reverse().map(x => {
+                        return [
+                            `${['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][x.month - 1]} ${x.year}`,
+                            {
+                                count: data.filter((y) => {
+                                    return (new Date(y.timestamp).getFullYear() === x.year &&
+                                        new Date(y.timestamp).getMonth() + 1 === x.month);
+                                }).length,
+                                uniques: [...new Set(data.filter((y) => {
+                                        return (new Date(y.timestamp).getFullYear() === x.year &&
+                                            new Date(y.timestamp).getMonth() + 1 === x.month);
+                                    }).flatMap(({ ip }) => ip))].sort().length
+                            }
+                        ];
+                    })
                 }
             }
         });

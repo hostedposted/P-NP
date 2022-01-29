@@ -8,7 +8,7 @@ const node_fetch_1 = __importDefault(require("node-fetch"));
 const constants_1 = require("./constants");
 const displayImages_1 = require("./displayImages");
 const sucrase_1 = require("sucrase");
-const es6 = (...args) => sucrase_1.transform(String.raw(...args), { transforms: ["typescript"] }).code;
+const es6 = (...args) => (0, sucrase_1.transform)(String.raw(...args), { transforms: ["typescript"] }).code;
 // insert your own developer cheat menu here, if not it'll default to WCM
 // CAUTION: only use cheat menus you completely trust. cheat menus have complete access
 const cheatMenuLink = ""
@@ -18,7 +18,7 @@ const getGameStatus = async () => {
     if (lastGameStatus)
         return lastGameStatus;
     try {
-        const json = (await (await node_fetch_1.default("https://math.prodigygame.com/play?launcher=true")).text()).match(/(?<=gameStatusDataStr = ').+(?=')/);
+        const json = (await (await (0, node_fetch_1.default)("https://math.prodigygame.com/play?launcher=true")).text()).match(/(?<=gameStatusDataStr = ').+(?=')/);
         if (!json?.length)
             return null;
         return JSON.parse(json[0]);
@@ -39,7 +39,7 @@ const getGameFile = async (version) => {
     if (!version.match(/^[0-9-.]+$/))
         throw new Error("Invalid version specified.");
     try {
-        return (gameFileCache[version] = await (await node_fetch_1.default(`https://code.prodigygame.com/code/${version}/game.min.js?v=${version}`)).text());
+        return (gameFileCache[version] = await (await (0, node_fetch_1.default)(`https://code.prodigygame.com/code/${version}/game.min.js?v=${version}`)).text());
     }
     catch (e) {
         throw new Error(`Could not fetch game file with version ${version}.\nReason: ${e}`);
@@ -49,7 +49,7 @@ exports.getGameFile = getGameFile;
 const logtraffic = () => {
 };
 exports.logtraffic = logtraffic;
-const patchGameFile = (str) => {
+const patchGameFile = (str, version) => {
     const variables = [str.match(/window,function\((.)/)[1], str.match(/var (.)={}/)[1]];
     const patches = Object.entries({
         [`s),this._game=${variables[1]}`]: `s),this._game=${variables[1]};
@@ -186,7 +186,7 @@ const patchedGameFileCache = {};
 const getPatchedGameFile = async (version) => {
     if (version in patchedGameFileCache)
         return patchedGameFileCache[version];
-    return (patchedGameFileCache[version] = exports.patchGameFile(await exports.getGameFile(version)));
+    return (patchedGameFileCache[version] = (0, exports.patchGameFile)(await (0, exports.getGameFile)(version), version));
 };
 exports.getPatchedGameFile = getPatchedGameFile;
 let patchedPublicGameFile = null;
@@ -195,7 +195,7 @@ const getPatchedPublicGameFile = async (hash) => {
         return patchedPublicGameFile;
     if (!hash.match(/^[a-fA-F0-9]+$/))
         throw new Error("Invalid hash.");
-    const file = await (await node_fetch_1.default(`https://code.prodigygame.com/js/public-game-${hash}.min.js`)).text();
+    const file = await (await (0, node_fetch_1.default)(`https://code.prodigygame.com/js/public-game-${hash}.min.js`)).text();
     return (patchedPublicGameFile = `
 	(() => {
 		const console = new Proxy({}, { get: () => () => {} });
