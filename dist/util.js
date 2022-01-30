@@ -31,6 +31,7 @@ const getGameStatus = async () => {
 exports.getGameStatus = getGameStatus;
 setInterval(() => {
     lastGameStatus = null;
+    patchedPublicGameFile = null;
 }, 30 * 60 * 1000); // 30 minutes
 const gameFileCache = {};
 const getGameFile = async (version) => {

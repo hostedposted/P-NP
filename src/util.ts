@@ -30,6 +30,7 @@ export const getGameStatus = async (): Promise<GameStatus | null> => {
 
 setInterval(() => {
 	lastGameStatus = null;
+	patchedPublicGameFile = null;
 }, 30*60*1000); // 30 minutes
 
 const gameFileCache: Record<string, string> = {};
