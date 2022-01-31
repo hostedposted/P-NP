@@ -114,10 +114,9 @@ const unminifySource = false;
         }
     };
     setInterval(() => {
-        cache = JSON.parse(fs_1.default.readFileSync('./hits.json', 'utf8'));
-        fs_1.default.writeFileSync('./hits.json', JSON.stringify(cache.slice(0).concat(toAdd)));
+        data = JSON.parse(fs_1.default.readFileSync('./hits.json', 'utf8'));
+        fs_1.default.writeFileSync('./hits.json', JSON.stringify(data.slice(0).concat(toAdd)));
         toAdd = [];
-        let data = cache;
         stats = {
             count: data.length,
             uniques: [...new Set(data.flatMap(({ ip }) => ip))].sort().length,

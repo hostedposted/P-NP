@@ -146,10 +146,9 @@ const unminifySource = false;
 	
 
 	setInterval(() => {
-		cache = JSON.parse(fs.readFileSync('./hits.json', 'utf8'))
-		fs.writeFileSync('./hits.json', JSON.stringify(cache.slice(0).concat(toAdd)))
+		data = JSON.parse(fs.readFileSync('./hits.json', 'utf8'))
+		fs.writeFileSync('./hits.json', JSON.stringify(data.slice(0).concat(toAdd)))
 		toAdd = []
-		let data = cache
 		stats = {
 
 			count: data.length,
