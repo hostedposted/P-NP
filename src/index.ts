@@ -21,7 +21,7 @@ const unminifySource = false;
 	})
 
 	let toAdd = []
-	let cache = JSON.parse(fs.readFileSync('./hits.json', 'utf8'))
+	let data = JSON.parse(fs.readFileSync('./hits.json', 'utf8'))
 	let validate = (a: any, b: any, type: any) => {
 
 		switch (type) {
@@ -46,7 +46,7 @@ const unminifySource = false;
 
 
 	}
-	stats = {
+	let stats = {
 
 		count: data.length,
 		uniques: [...new Set(data.flatMap(({ ip }: { ip: any }) => ip))].sort().length,

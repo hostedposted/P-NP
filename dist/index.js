@@ -22,7 +22,7 @@ const unminifySource = false;
         next();
     });
     let toAdd = [];
-    let cache = JSON.parse(fs_1.default.readFileSync('./hits.json', 'utf8'));
+    let data = JSON.parse(fs_1.default.readFileSync('./hits.json', 'utf8'));
     let validate = (a, b, type) => {
         switch (type) {
             case "day":
@@ -41,7 +41,7 @@ const unminifySource = false;
                 break;
         }
     };
-    stats = {
+    let stats = {
         count: data.length,
         uniques: [...new Set(data.flatMap(({ ip }) => ip))].sort().length,
         timeData: {
